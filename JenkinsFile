@@ -4,8 +4,7 @@ pipeline {
         stage('Pre-Build Scan') {
             steps {
                 sh 'echo "Running TruffleHog Scan!"'
-                def trufflehog_status = sh(returnStatus: true, script: 'docker run -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github --repo https://github.com/supriyasupekar26/PythonVulnApp.git --token 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 --no-verification --json --fail')
-                println "Truffle hog status: ${trufflehog_status}"
+                sh 'docker run -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github --repo https://github.com/supriyasupekar26/PythonVulnApp.git --token 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 --no-verification --json --fail'
             }
         }
     }
