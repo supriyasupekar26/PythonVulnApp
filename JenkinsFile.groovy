@@ -23,17 +23,20 @@ pipeline {
             }
         }
        stage('Snyk Scanning'){
-       steps {
-       withCredentials([string(credentialsId: 'SNYK_Token', variable: 'SNYK_SECRET')]) {
-        echo 'Snyk Testing...'
-        sh "snyk auth ${SNYK_SECRET}"
-        snykSecurity(
-          snykInstallation: 'Snyk',
-          snykTokenId: '794baaeb-0374-4316-a3cf-c4b7a32a5828',
-          projectName: "${env.project_name}",
-          failOnIssues: false,
-          failOnError: false
-        )
+           steps {
+               withCredentials([string(credentialsId: 'SNYK_Token', variable: 'SNYK_SECRET')]) {
+                echo 'Snyk Testing...'
+                sh """ snyk auth ${SNYK_SECRET} \
+                       snyk --project-name "${env.project_name}" --file . 
+                   """    
+           
+        //         snykSecurity(
+        //           snykInstallation: 'Snyk',
+        //           snykTokenId: '794baaeb-0374-4316-a3cf-c4b7a32a5828',
+        //           projectName: "${env.project_name}",
+        //           failOnIssues: false,
+        //           failOnError: false
+        //         )
         }
       }
        }
