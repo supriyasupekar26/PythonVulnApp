@@ -24,7 +24,7 @@ pipeline {
         }
        stage('Snyk Scanning'){
        steps {
-       withCredentials([string(credentialsId: 'snykToken', variable: 'SNYK_SECRET')]) {
+       withCredentials([string(credentialsId: 'SNYK_Token', variable: 'SNYK_SECRET')]) {
         echo 'Snyk Testing...'
         snykSecurity(
           snykInstallation: 'synk',
