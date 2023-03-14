@@ -5,7 +5,7 @@ pipeline {
         project_name = "PythonVulnApp"
         git_branch_name = "${BRANCH_NAME}"
         currDir = "${WORKSPACE}"
-        scannerHome = tool 'sonar_scanner';
+        scannerHome = tool 'sonarqube_scanner';
             
     }    
 
