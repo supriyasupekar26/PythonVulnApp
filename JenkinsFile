@@ -28,9 +28,9 @@ pipeline {
         echo 'Snyk Testing...'
         snykSecurity(
           snykInstallation: 'synk',
-          snykTokenId:${SNYK_SECRET}
-          projectName:${env.project_name}
-          failOnIssues: false
+          snykTokenId:${SNYK_SECRET},
+          projectName:${env.project_name},
+          failOnIssues: false,
           failOnError: false
         )
         }
