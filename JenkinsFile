@@ -25,21 +25,21 @@ pipeline {
         }
        
         
-        stage('SonarQube analysis') {     
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh """ ${env.scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=${env.project_name} \
-                            -Dsonar.projectName=${env.project_name} \
-                            -Dsonar.projectVersion=${BUILD_NUMBER}-${env.git_branch_name} \
-                            -Dsonar.organization="supriyasupekar26"
-                     v                                                           """
-                                    }           
+    //     stage('SonarQube analysis') {     
+    //         steps {
+    //             withSonarQubeEnv('SonarQube') {
+    //                 sh """ ${env.scannerHome}/bin/sonar-scanner \
+    //                         -Dsonar.projectKey=${env.project_name} \
+    //                         -Dsonar.projectName=${env.project_name} \
+    //                         -Dsonar.projectVersion=${BUILD_NUMBER}-${env.git_branch_name} \
+    //                         -Dsonar.organization="supriyasupekar26"
+    //                  v                                                           """
+    //                                 }           
 
-                sleep 60
-                waitForQualityGate abortPipeline: true                       
-        }
-    }
+    //             sleep 60
+    //             waitForQualityGate abortPipeline: true                       
+    //     }
+    // }
     stage('Build') {
         steps {
             script {
