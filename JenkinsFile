@@ -1,8 +1,8 @@
 pipeline {
     agent any
-    project_name = "PythonVulnApp"
-    git_branch_name = "${BRANCH_NAME}"
-    currDir = "${WORKSPACE}"
+    def project_name = "PythonVulnApp"
+    def git_branch_name = "${BRANCH_NAME}"
+    def currDir = "${WORKSPACE}"
 
     stages {
         stage("Env Variables") {
