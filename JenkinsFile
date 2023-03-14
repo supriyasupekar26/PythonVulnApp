@@ -23,7 +23,7 @@ pipeline {
                 // sh 'trufflehog github --repo https://github.com/supriyasupekar26/PythonVulnApp.git --token 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 --no-verification --json --fail'
             }
         }
-        
+       
         
         stage('SonarQube analysis') {     
 
@@ -41,4 +41,5 @@ pipeline {
                 }
         }
     }
+}
 }
