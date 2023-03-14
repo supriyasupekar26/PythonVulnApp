@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        project_name = "${JOB_NAME}".split(/\/(.*)/)[0]
+        project_name = "PythonVulnApp/main".split(/\/(.*)/)[0]
         git_branch_name = "${BRANCH_NAME}"
         currDir = "${WORKSPACE}"
         scannerHome = tool 'sonar_scanner';
@@ -26,19 +26,20 @@ pipeline {
        
         
         stage('SonarQube analysis') {     
-
-            withSonarQubeEnv() {
-                sh """ ${env.scannerHome}/bin/sonar-scanner \
-                        -Dsonar.projectKey=${env.project_name} \
-                        -Dsonar.projectName=${env.project_name} \
-                        -Dsonar.projectVersion=${BUILD_NUMBER}-${env.git_branch_name} \
-                        """
-            }       
-            timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
-                def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
-                if (qg.status != 'OK') {
-                error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                }
+            steps {
+                withSonarQubeEnv() {
+                    sh """ ${env.scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=${env.project_name} \
+                            -Dsonar.projectName=${env.project_name} \
+                            -Dsonar.projectVersion=${BUILD_NUMBER}-${env.git_branch_name} \
+                            """
+                                    }       
+                timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
+                    def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
+                    if (qg.status != 'OK') {
+                    error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                    }
+                }    
         }
     }
 }
