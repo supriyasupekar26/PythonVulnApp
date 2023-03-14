@@ -6,6 +6,9 @@ pipeline {
         git_branch_name = "${BRANCH_NAME}"
         currDir = "${WORKSPACE}"
         scannerHome = tool 'sonarqube_scanner';  
+        withCredentials([string(credentialsId: 'SNYK_Token', variable: 'SNYK_SECRET')]) {
+            SNYK_TOKEN = "${SNYK_SECRET}"
+            }
     }    
 
 
