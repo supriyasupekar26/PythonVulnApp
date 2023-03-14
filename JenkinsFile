@@ -5,17 +5,16 @@ pipeline {
         project_name = "PythonVulnApp"
         git_branch_name = "${BRANCH_NAME}"
         currDir = "${WORKSPACE}"
-        scannerHome = tool 'sonarqube_scanner';
-            
+        scannerHome = tool 'sonarqube_scanner';       
     }    
 
 
-    stages {
-        stage("Env Variables") {
-            steps {
-                sh "printenv"
-            }
-        }
+//     stages {
+//         stage("Env Variables") {
+//             steps {
+//                 sh "printenv"
+//             }
+//         }
 
         stage('Trufflehog Scan') {
             steps {
@@ -23,7 +22,20 @@ pipeline {
                 // sh 'trufflehog github --repo https://github.com/supriyasupekar26/PythonVulnApp.git --token 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 --no-verification --json --fail'
             }
         }
-       
+       stage('Snyk Scanning'){
+       steps {
+       withCredentials([string(credentialsId: 'snykToken', variable: 'SNYK_SECRET')]) {
+        echo 'Snyk Testing...'
+        snykSecurity(
+          snykInstallation: 'synk',
+          snykTokenId:${SNYK_SECRET}
+          projectName:${env.project_name}
+          failOnIssues: false
+          failOnError: false
+        )
+        }
+      }
+       }
         
     //     stage('SonarQube analysis') {     
     //         steps {
@@ -33,20 +45,20 @@ pipeline {
     //                         -Dsonar.projectName=${env.project_name} \
     //                         -Dsonar.projectVersion=${BUILD_NUMBER}-${env.git_branch_name} \
     //                         -Dsonar.organization="supriyasupekar26"
-    //                  v                                                           """
+    //                     """
     //                                 }           
 
     //             sleep 60
     //             waitForQualityGate abortPipeline: true                       
     //     }
     // }
-    stage('Build') {
-        steps {
-            script {
-            print "Building docker image..."
-            docker.build 'PythonVulnApp:1'
-            }
-        }
-    }
+//     stage('Build') {
+//         steps {
+//             script {
+//             print "Building docker image..."
+//             docker.build 'PythonVulnApp:1'
+//             }
+//         }
+//     }
 }
 }
