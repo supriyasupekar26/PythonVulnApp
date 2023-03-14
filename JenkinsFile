@@ -1,9 +1,14 @@
-def project_name = "PythonVulnApp"
-def git_branch_name = "${BRANCH_NAME}"
-def currDir = "${WORKSPACE}"
-
 pipeline {
     agent any
+
+    environment {
+        project_name = "${JOB_NAME}".split(/\/(.*)/)[0]
+        git_branch_name = "${BRANCH_NAME}"
+        currDir = "${WORKSPACE}"
+        scannerHome = tool 'sonar_scanner';
+            
+    }    
+
 
     stages {
         stage("Env Variables") {
@@ -20,14 +25,13 @@ pipeline {
         }
         
         
-        stage('SonarQube analysis') {
-            def scannerHome = tool 'sonar_scanner';           
+        stage('SonarQube analysis') {     
 
             withSonarQubeEnv() {
-                sh """ ${scannerHome}/bin/sonar-scanner \
-                        -Dsonar.projectKey=${project_name} \
-                        -Dsonar.projectName=${project_name} \
-                        -Dsonar.projectVersion=${BUILD_NUMBER}-${git_branch_name} \
+                sh """ ${env.scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=${env.project_name} \
+                        -Dsonar.projectName=${env.project_name} \
+                        -Dsonar.projectVersion=${BUILD_NUMBER}-${env.git_branch_name} \
                         """
             }       
             timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
@@ -37,5 +41,4 @@ pipeline {
                 }
         }
     }
-}
 }
