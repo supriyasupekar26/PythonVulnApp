@@ -29,7 +29,7 @@ pipeline {
         sh "snyk auth ${SNYK_SECRET}"
         snykSecurity(
           snykInstallation: 'Snyk',
-          snykTokenId: '794baaeb-0374-4316-a3cf-c4b7a32a5828'
+          snykTokenId: '794baaeb-0374-4316-a3cf-c4b7a32a5828',
           projectName: "${env.project_name}",
           failOnIssues: false,
           failOnError: false
