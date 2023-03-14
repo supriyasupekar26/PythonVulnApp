@@ -33,11 +33,16 @@ pipeline {
                             -Dsonar.projectName=${env.project_name} \
                             -Dsonar.projectVersion=${BUILD_NUMBER}-${env.git_branch_name} \
                             -Dsonar.organization="supriyasupekar26"
-                            """
+                     v                                                           """
                                     }           
 
                 sleep 60
                 waitForQualityGate abortPipeline: true                       
+        }
+    }
+    stage('Build') {
+        steps {
+            docker.build 'PythonVulnApp:1'
         }
     }
 }
