@@ -26,7 +26,7 @@ pipeline {
        steps {
        withCredentials([string(credentialsId: 'SNYK_Token', variable: 'SNYK_SECRET')]) {
         echo 'Snyk Testing...'
-        echo "My secret text is '${SYNK_SECRET}'"
+        echo "My secret text is '${SNYK_SECRET}'"
         sh "snyk auth 794baaeb-0374-4316-a3cf-c4b7a32a5828"
         snykSecurity(
           snykInstallation: 'Snyk',
