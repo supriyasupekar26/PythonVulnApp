@@ -27,7 +27,7 @@ pipeline {
        withCredentials([string(credentialsId: 'SNYK_Token', variable: 'SNYK_SECRET')]) {
         echo 'Snyk Testing...'
         snykSecurity(
-          snykInstallation: 'synk',
+          snykInstallation: 'Snyk',
           snykTokenId:"${SNYK_SECRET}",
           projectName:"${env.project_name}",
           failOnIssues: false,
