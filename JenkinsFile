@@ -32,6 +32,7 @@ pipeline {
                             -Dsonar.projectKey=${env.project_name} \
                             -Dsonar.projectName=${env.project_name} \
                             -Dsonar.projectVersion=${BUILD_NUMBER}-${env.git_branch_name} \
+                            -Dsonar.organization="supriyasupekar26"
                             """
                                     }           
 
