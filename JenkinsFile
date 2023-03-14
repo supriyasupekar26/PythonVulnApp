@@ -1,11 +1,40 @@
 pipeline {
     agent any
+    project_name = "PythonVulnApp"
+    git_branch_name = "${BRANCH_NAME}"
+    currDir = "${WORKSPACE}"
+
     stages {
         stage("Env Variables") {
             steps {
                 sh "printenv"
             }
         }
-    }    
-}
 
+        stage('Trufflehog Scan') {
+            steps {
+                sh 'echo "Running TruffleHog Scan!"'
+                // sh 'trufflehog github --repo https://github.com/supriyasupekar26/PythonVulnApp.git --token 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 --no-verification --json --fail'
+            }
+        }
+        
+        
+        stage('SonarQube analysis') {
+            def scannerHome = tool 'sonar_scanner';           
+
+            withSonarQubeEnv() {
+                sh """ ${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=${project_name} \
+                        -Dsonar.projectName=${project_name} \
+                        -Dsonar.projectVersion=${BUILD_NUMBER}-${git_branch_name} \
+                        """
+            }       
+            timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
+                def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
+                if (qg.status != 'OK') {
+                error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                }
+        }
+    }
+}
+}
