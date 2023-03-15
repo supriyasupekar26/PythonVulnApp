@@ -61,7 +61,7 @@ pipeline {
             script {
             print "Building docker image..."
 //            docker.build '${project_name}:${BUILD_NUMBER}'
-            docker.build 'pyhtonvulnapp:${BUILD_NUMBER}'
+            docker.build "pyhtonvulnapp:${BUILD_NUMBER}"
             }
         }
     }
