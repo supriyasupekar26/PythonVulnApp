@@ -60,8 +60,9 @@ pipeline {
         steps {
             script {
             print "Building docker image..."
-//            docker.build '${project_name}:${BUILD_NUMBER}'
-            docker.build "pyhtonvulnapp:${BUILD_NUMBER}"
+            sh "docker build -t "supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}" .
+            sh "docker push "supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}"
+//            docker.build '${project_name}:${BUILD_NUMBER}'            
             }
         }
     }
