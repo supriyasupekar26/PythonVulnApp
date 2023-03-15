@@ -60,7 +60,7 @@ pipeline {
         steps {
             script {
             print "Building docker image..."
-            docker.build 'PythonVulnApp:1'
+            sh "docker build -t PythonVulnApp:1 ."
             }
         }
     }
