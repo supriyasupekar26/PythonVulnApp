@@ -61,53 +61,30 @@ pipeline {
             script {
             print "Building docker image..."
             sh """docker build -t "supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}" .
-                  docker push "supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}" """
-//            docker.build '${project_name}:${BUILD_NUMBER}'            
+               """      
+//                docker push "supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}"               
             }
         }
     }
-}       
-stages {
-        stage('Qualys Container Security') {
-            steps {
-                withCredentials([
-                    usernamePassword(credentialsId: 'qualys-creds', passwordVariable: 'HyEoOCcQ', usernameVariable: 'quays8pa10')
-                ]) {
-                    sh "docker pull "supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}""
-                    sh "docker tag your-image:tag supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}"
-                    sh "docker login -u $USERNAME -p $PASSWORD supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}"
-                    sh docker push "supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}"
-                    withEnv(['QUALYS_API_TOKEN=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJxdWF5czhwYTEwIiwibG9naW5SZXNwb25
-zZSI6IlNVQ0NFU1NGVUwiLCJhdXRoZW50aWNhdGlvbkRhdGUiOlsxNjc5MTMwMTc2ODMxXSwic3VjY2V
-zc2Z1bEF1dGhlbnRpY2F0aW9uSGFuZGxlcnMiOlsiQXV0aEhhbmRsZXIiXSwiaXNzIjoicWFzIiwiaXB
-BZGRyZXNzIjoiMjIzLjIzMy44MC4zOCIsInBvcnRhbFVzZXJJZCI6NjYyNDYyNzUsInVzZXJ0eXBlIjo
-iZm8iLCJxd2ViVXNlcklkIjoyNTI2MTA2LCJjcmVkZW50aWFsVHlwZSI6IlFVc2VybmFtZVBhc3N3b3J
-kQ3JlZGVudGlhbCIsImF1ZCI6InFhcyIsIm1vZHVsZXNBbGxvd2VkIjpbIkFTU0VUIElOVkVOVE9SWSI
-sIkVDMiIsIktCWCIsIk1BTCIsIk9GRkxJTkUgVklSVFVBTCBTQ0FOTkVSIiwiUUZMT1ciLCJSRVBPUlQ
-gQ0VOVEVSIiwiVEMiLCJBRE1JTiIsIkNFUlRWSUVXIiwiRklNIiwiUVdFQl9WTSIsIlNTQyIsIkNPTlR
-JTlVPVVMgTU9OSVRPUklORyIsIkZSRUUgQUdFTlQiLCJQQyBTQ0FOTkVSIiwiU0VDVVJFQ09ORklHIiw
-iVUQiLCJWTSIsIkFTU0VUX01BTkFHRU1FTlQiLCJOQUMiLCJPQ0EiLCJQUyIsIlNFQ1VSSVRZX0FOQUx
-ZVElDUyIsIlZQRSIsIldBRkVudGVycHJpc2UiLCJDTE9VRFZJRVciLCJHTE9CQUxfQUlfQ01EQl9TWU5
-DIiwiUE0iLCJQT1JUQUwgVEFHR0lORyIsIlNDQU4gQlkgSE9TVE5BTUUiLCJTRU0iLCJXQUYiLCJDT05
-UQUlORVJfU0VDVVJJVFkiLCJJQ1MiLCJJUHY2IiwiTE9HX0NPTExFQ1RPUiIsIk1EUyIsIlBDIiwiUUd
-TIiwiU0FNTCIsIlNDQV9BR0VOVCIsIlNNIiwiVE9UQUxfQ0xPVUQiLCJVTklGSUVEX0RBU0hCT0FSRCI
-sIlZMQU4iLCJWTSBBR0VOVCIsIklPQyIsIklUQU0iLCJORVRXT1JLIFNVUFBPUlQiLCJQQ0kiLCJRV0V
-CX1BDIiwiVEhSRUFUIFBST1RFQ1QiLCJUSFJFQVRfUFJPVEVDVCIsIlZJUlRVQUwgU0NBTk5FUiIsIld
-BUyIsIkFQSSIsIkNBIiwiQ0VSVF9WSUVXIiwiQ00iLCJDUyIsIkxNIiwiTE9HIE1BTkFHRU1FTlQiLCJ
-NUFMiLCJQQVNTSVZFX1NDQU5ORVIiLCJRVUVTVElPTk5BSVJFIiwiVk0gU0NBTk5FUiJdLCJhdXRoZW5
-0aWNhdGlvbk1ldGhvZCI6IkF1dGhIYW5kbGVyIiwiY3VzdG9tZXJJZCI6MTI5MjIxLCJzZXNzaW9uRXh
-waXJhdGlvbiI6IjI0MCIsInVzZXJVdWlkIjoiMjhjZDNkMDUtNGNhNC1mNjRiLTgzYjEtMjhlYzhlODV
-lMGM5Iiwic3Vic2NyaXB0aW9uVXVpZCI6ImE1NDAxZjY0LTZiY2MtZDY1My04MmUwLTA5YTI1MTdmZWN
-hOSIsImlzVGd0RXhwaXJlZCI6InRydWUiLCJqd3RFeHBpcnlNaW51dGUiOiIyNDAiLCJzdWJzY3JpcHR
-pb25JZCI6MjA0NywiZXhwIjoxNjc5MTQ0NTc2LCJpYXQiOjE2NzkxMzAxNzYsImp0aSI6IlRHVDIxOTg
-yMS16U0dPaHhxZXJ6REdiaHVweXdiUHZERUpqS2RjaG1jR3p0ZnR3U2dLVFZScEdUV0VYc0lscFByVkJ
-aV2d2dlRRLXFhcy1iZmM4YzdiNmMtbmN3cDQifQ.yOyspzoLOHp8wiDCTFzx8indwpBFVfSAuMAK-k-b
-ixpij2RxVldsg51IDwgDA3l8hg9o863Db9Mdcum_enTqXQ']) {
-                    sh "docker run -e API_TOKEN=$QUALYS_API_TOKEN -e IMAGE=supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER} qualys/container-sensor"
-                    }
-                }
+    
+    stage('Extract Image Id') {
+        steps {
+            script {
+                def IMAGE_ID = sh(script: "docker images | grep -E '^supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}' | head -1 | awk '{print \$3}'", returnStdout: true).trim()
+                echo "Image Id extracted: ${IMAGE_ID}"
+                env.IMAGE_ID = IMAGE_ID
             }
         }
+    }
+
+    stage('Validate With Qualys') {
+        steps {
+            echo "Image Id to get vulns: ${env.IMAGE_ID}"
+            getImageVulnsFromQualys imageIds: env.IMAGE_ID, useGlobalConfig: true
+        }
+    }    
+    
+}       
 
 }
 
