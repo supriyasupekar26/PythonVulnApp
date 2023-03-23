@@ -70,7 +70,7 @@ pipeline {
     stage('Extract Image Id') {
         steps {
             script {
-                def IMAGE_ID = sh(script: "docker images | grep -E '^supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}' | head -1 | awk '{print \$3}'", returnStdout: true).trim()
+                def IMAGE_ID = sh(script: "docker images | grep -E 'supriyasupekar/pyhtonvulnapp' | head -1 | awk '{print \$3}'", returnStdout: true).trim()
                 echo "Image Id extracted: ${IMAGE_ID}"
                 env.IMAGE_ID = IMAGE_ID
             }
