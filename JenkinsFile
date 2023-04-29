@@ -3,88 +3,111 @@ pipeline {
 
     environment {
         project_name = "PythonVulnApp"
+        docker_repo = "supriyasupekar"        
         git_branch_name = "${BRANCH_NAME}"
-        currDir = "${WORKSPACE}"
-        scannerHome = tool 'sonarqube_scanner';  
-    }    
+        scannerHome = tool 'sonarqube_scanner'
+        sonar_org = "supriyasupekar26"
+    }
 
+    options {
+        // enabling timeout to protect jenkins job from running indefinetely 
+        timeout(time: 1, unit: 'HOURS')
+        // to print timestamp along with logs
+        timestamps()
+    }
 
-   stages {
-         stage("Env Variables") {
-             steps {
-                 sh "printenv"
-             }
-         }
-
-        stage('Trufflehog Scan') {
+    stages {
+        stage("Environment Variables") {
             steps {
-                sh 'echo "Running TruffleHog Scan!"'
-                // sh 'trufflehog github --repo https://github.com/supriyasupekar26/PythonVulnApp.git --token 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 --no-verification --json --fail'
+                    // printing the jenkins runtime environmental variable
+                    sh "printenv"
             }
         }
-//        stage('Snyk Scanning'){
-//            steps {
-//                withCredentials([string(credentialsId: 'SNYK_Token', variable: 'SNYK_SECRET')]) {
-//                 echo 'Snyk Testing...'
-//                 sh """ snyk auth ${SNYK_SECRET} \
-//                        snyk --project-name "${env.project_name}" --file . 
-//                    """    
-           
-//         //         snykSecurity(
-//         //           snykInstallation: 'Snyk',
-//         //           snykTokenId: '794baaeb-0374-4316-a3cf-c4b7a32a5828',
-//         //           projectName: "${env.project_name}",
-//         //           failOnIssues: false,
-//         //           failOnError: false
-//         //         )
-//         }
-//       }
-//        }
+
+        stage('TruffleHog Scan') {
+            steps {
+                sh 'echo "Running TruffleHog Scan!'
+                    // Scan the cloned the git repo for any hardcoded credentials
+                    // trufflehog should be installed in the jenkins nodes
+
+                    sh """
+                        trufflehog filesystem $PWD --no-verification --json --fail
+                    """
+            }
+        }
+
+        stage('Snyk Scanning') {
+            steps {
+                // Use 'withCredentials' to securely store and retrieve credentials in the pipeline
+                withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
+                    echo 'Running Snyk Scan...'
+                    //to scan for vulnerabilities in the code
+                    snykSecurity(
+                        snykInstallation: 'Snyk',
+                        snykTokenId: "${SNYK_TOKEN}",
+                        projectName: "${project_name}",
+                        failOnIssues: false,
+                        failOnError: false
+                    )
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                print "Running SonaqrQube Analysis.."
+                withSonarQubeEnv('SonarQube') {
+                    //to analyze the code for quality and security issues and fails the job if the code quality didnt meet the conditions
+                    sh """
+                        ${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=${project_name} \
+                        -Dsonar.projectName=${project_name} \
+                        -Dsonar.projectVersion=${BUILD_NUMBER}-${git_branch_name} \
+                        -Dsonar.organization="${sonar_org}"
+                    """
+                }
+                sleep 60
+                waitForQualityGate abortPipeline: true 
+            }
+        }
+        stage('Build') {
+            steps {
+                // docker build stage
+                script {
+                print "Building docker image..."
+                sh """docker build -t "${docker_repo}/${project_name}:${BUILD_NUMBER}" .
+                """              
+                }
+            }
+        }    
+
+        stage('Extract Image Id') {
+            steps {
+                // extracting the image id to pass to it qualys container security 
+                script {
+                    def IMAGE_ID = sh(script: "docker images | grep -E '${docker_repo}/${project_name}:${BUILD_NUMBER}' | head -1 | awk '{print \$3}'", returnStdout: true).trim()
+                    echo "Image Id extracted: ${IMAGE_ID}"
+                    env.IMAGE_ID = IMAGE_ID
+                }
+            }
+        }
         
-    //     stage('SonarQube analysis') {     
-    //         steps {
-    //             withSonarQubeEnv('SonarQube') {
-    //                 sh """ ${env.scannerHome}/bin/sonar-scanner \
-    //                         -Dsonar.projectKey=${env.project_name} \
-    //                         -Dsonar.projectName=${env.project_name} \
-    //                         -Dsonar.projectVersion=${BUILD_NUMBER}-${env.git_branch_name} \
-    //                         -Dsonar.organization="supriyasupekar26"
-    //                     """ 
-    //                                 }           
-//
-    //             sleep 60
-    //             waitForQualityGate abortPipeline: true                       
-    //     }
-    // }
-    stage('Build') {
-        steps {
-            script {
-            print "Building docker image..."
-            sh """docker build -t "supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}" .
-               """      
-//                docker push "supriyasupekar/pyhtonvulnapp:${BUILD_NUMBER}"               
+        stage('Validate With Qualys') {
+            steps {
+                // scanning the docker image with qualys plugin
+                echo "Image Id to get vulns: ${env.IMAGE_ID}"
+                getImageVulnsFromQualys imageIds: env.IMAGE_ID, useGlobalConfig: true, isFailOnSevereVulns: true 
             }
-        }
-    }
-    
-    stage('Extract Image Id') {
-        steps {
-            script {
-                def IMAGE_ID = sh(script: "docker images | grep -E 'supriyasupekar/pyhtonvulnapp' | head -1 | awk '{print \$3}'", returnStdout: true).trim()
-                echo "Image Id extracted: ${IMAGE_ID}"
-                env.IMAGE_ID = IMAGE_ID
+        } 
+        stage('Push to registry') {
+            steps {
+                // pushing the validated docker to docker hub
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials',usernameVariable: 'DOCKER_USERNAME',passwordVariable: 'DOCKER_PASSWORD')]) {               
+                echo "pushing validated image to dockerhub registry"
+                sh """
+                docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+                docker push "${docker_repo}/${project_name}:${BUILD_NUMBER}"
+                """
+                }
             }
-        }
-    }
-
-    stage('Validate With Qualys') {
-        steps {
-            echo "Image Id to get vulns: ${env.IMAGE_ID}"
-            getImageVulnsFromQualys imageIds: env.IMAGE_ID, useGlobalConfig: true
-        }
-    }    
-    
-}       
-
-}
-
+        }                     
